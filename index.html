@@ -201,23 +201,6 @@ input::placeholder{color:var(--text-dim);}
 </div>
 
 <!-- API KEY CARD -->
-<div class="card" id="keycard" style="border-color:rgba(61,133,245,.35);">
-  <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
-    <div style="font-size:15px;">&#128273;</div>
-    <div>
-      <div style="font-family:var(--mono);font-size:11px;color:var(--text-bright);font-weight:500;">Anthropic API-Key</div>
-      <div style="font-family:var(--mono);font-size:10px;color:var(--text-dim);margin-top:2px;">Einmalig eingeben &mdash; wird im Browser gespeichert</div>
-    </div>
-    <div id="keystatus" style="margin-left:auto;font-family:var(--mono);font-size:10px;padding:3px 9px;border-radius:4px;display:none;"></div>
-  </div>
-  <div style="display:flex;gap:10px;">
-    <input type="password" id="apikey" placeholder="sk-ant-api03-..." style="flex:1;" oninput="checkKey()" />
-    <button onclick="saveKey()" style="padding:10px 16px;background:var(--accent);border:none;border-radius:8px;color:#fff;font-family:var(--mono);font-size:12px;cursor:pointer;white-space:nowrap;">Speichern</button>
-  </div>
-  <div style="font-size:11px;color:var(--text-dim);margin-top:8px;line-height:1.6;">
-    Key holen: <a href="https://console.anthropic.com/settings/keys" target="_blank" style="color:var(--accent);">console.anthropic.com &#x2192;</a> &nbsp;|&nbsp; Wird nur lokal im Browser gespeichert, nie uebertragen.
-  </div>
-</div>
 
 <div class="card">
   <div class="row2">

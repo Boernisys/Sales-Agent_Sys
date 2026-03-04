@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IT Sales Intelligence Agent</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0d12;--surface:#111520;--surface2:#161c2a;--border:#1e2840;--border-bright:#2a3a5c;--accent:#3d85f5;--accent2:#f0a500;--accent3:#2ecc71;--text:#c8d6f0;--text-dim:#5a7099;--text-bright:#e8f0ff;--danger:#e05555;--hs:#ff7a59;--mono:'IBM Plex Mono',monospace;--sans:'IBM Plex Sans',sans-serif;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(61,133,245,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(61,133,245,.025) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0;}
+.wrap{position:relative;z-index:1;max-width:980px;margin:0 auto;padding:32px 20px 80px;}
+.hdr{display:flex;align-items:flex-start;gap:16px;margin-bottom:36px;padding-bottom:24px;border-bottom:1px solid var(--border);}
+.hdr-ico{width:44px;height:44px;background:linear-gradient(135deg,var(--accent),#1a5fd4);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;box-shadow:0 0 24px rgba(61,133,245,.3);}
+.hdr h1{font-family:var(--mono);font-size:19px;font-weight:600;color:var(--text-bright);letter-spacing:-.5px;}
+.hdr p{font-size:11px;color:var(--text-dim);margin-top:4px;font-family:var(--mono);}
+.badge{margin-left:auto;font-family:var(--mono);font-size:10px;color:var(--accent);border:1px solid var(--accent);padding:3px 8px;border-radius:3px;letter-spacing:1px;text-transform:uppercase;opacity:.7;white-space:nowrap;align-self:center;}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:24px;margin-bottom:18px;}
+.lbl{font-family:var(--mono);font-size:10px;color:var(--text-dim);letter-spacing:2px;text-transform:uppercase;margin-bottom:7px;display:block;}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;}
+@media(max-width:580px){.row2{grid-template-columns:1fr;}}
+.fg{display:flex;flex-direction:column;}
+input[type=text],input[type=password]{background:var(--bg);border:1px solid var(--border-bright);color:var(--text-bright);font-family:var(--sans);font-size:14px;padding:10px 13px;border-radius:8px;outline:none;width:100%;transition:border-color .2s,box-shadow .2s;}
+input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(61,133,245,.1);}
+input::placeholder{color:var(--text-dim);}
+.chips{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;}
+.chip{display:flex;align-items:center;gap:5px;padding:5px 11px;border-radius:6px;border:1px solid var(--border-bright);background:transparent;color:var(--text-dim);font-family:var(--mono);font-size:11px;cursor:pointer;transition:all .2s;user-select:none;}
+.chip.on{border-color:var(--accent);color:var(--accent);background:rgba(61,133,245,.08);}
+.go{width:100%;padding:13px;background:linear-gradient(135deg,var(--accent),#1a5fd4);border:none;border-radius:8px;color:#fff;font-family:var(--mono);font-size:14px;font-weight:500;cursor:pointer;transition:all .2s;letter-spacing:.5px;display:flex;align-items:center;justify-content:center;gap:8px;}
+.go:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 8px 24px rgba(61,133,245,.35);}
+.go:disabled{opacity:.5;cursor:not-allowed;transform:none;}
+.sbar{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:11px 16px;display:none;align-items:center;gap:10px;margin-bottom:18px;}
+.sbar.on{display:flex;}
+.spin{width:14px;height:14px;border:2px solid var(--border-bright);border-top-color:var(--accent);border-radius:50%;animation:sp .8s linear infinite;flex-shrink:0;}
+@keyframes sp{to{transform:rotate(360deg);}}
+.tbar{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:13px 18px;display:none;align-items:center;gap:10px;margin-bottom:18px;flex-wrap:wrap;}
+.tbar.on{display:flex;}
+.tbtn{display:flex;align-items:center;gap:6px;padding:7px 14px;border-radius:7px;border:1px solid;font-family:var(--mono);font-size:11px;cursor:pointer;transition:all .2s;background:transparent;}
+.tbtn.pdf{color:#fc8181;border-color:rgba(252,129,129,.35);}
+.tbtn.pdf:hover{background:rgba(252,129,129,.08);}
+.tbtn.doc{color:#63b3ed;border-color:rgba(99,179,237,.35);}
+.tbtn.doc:hover{background:rgba(99,179,237,.08);}
+.tbtn.hs{color:var(--hs);border-color:rgba(255,122,89,.35);}
+.tbtn.hs:hover{background:rgba(255,122,89,.08);}
+.tsep{width:1px;height:22px;background:var(--border);}
+.err{background:rgba(224,85,85,.08);border:1px solid rgba(224,85,85,.3);border-radius:8px;padding:13px 16px;color:var(--danger);font-size:13px;display:none;margin-bottom:16px;}
+.err.on{display:block;}
+#res{display:none;}
+#res.on{display:block;}
+.rhdr{display:flex;align-items:flex-start;gap:12px;margin-bottom:22px;}
+.rco{font-family:var(--mono);font-size:21px;font-weight:600;color:var(--text-bright);}
+.rsu{font-size:11px;color:var(--text-dim);font-family:var(--mono);margin-top:3px;}
+.spill{margin-left:auto;font-family:var(--mono);font-size:11px;padding:5px 12px;border-radius:20px;white-space:nowrap;border:1px solid;}
+.spill.h{background:rgba(46,204,113,.12);border-color:rgba(46,204,113,.3);color:var(--accent3);}
+.spill.m{background:rgba(240,165,0,.12);border-color:rgba(240,165,0,.3);color:var(--accent2);}
+.spill.l{background:rgba(224,85,85,.1);border-color:rgba(224,85,85,.3);color:var(--danger);}
+.sec{background:var(--surface);border:1px solid var(--border);border-radius:12px;margin-bottom:12px;overflow:hidden;animation:fi .35s ease both;}
+@keyframes fi{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+.sec:nth-child(1){animation-delay:.05s}.sec:nth-child(2){animation-delay:.1s}.sec:nth-child(3){animation-delay:.15s}.sec:nth-child(4){animation-delay:.2s}.sec:nth-child(5){animation-delay:.25s}.sec:nth-child(6){animation-delay:.3s}.sec:nth-child(7){animation-delay:.35s}.sec:nth-child(8){animation-delay:.4s}.sec:nth-child(9){animation-delay:.45s}.sec:nth-child(10){animation-delay:.5s}
+.sh{display:flex;align-items:center;gap:9px;padding:13px 18px;border-bottom:1px solid var(--border);cursor:pointer;user-select:none;}
+.sh:hover{background:rgba(61,133,245,.03);}
+.si{font-size:14px;width:26px;height:26px;display:flex;align-items:center;justify-content:center;background:var(--surface2);border-radius:6px;flex-shrink:0;}
+.st{font-family:var(--mono);font-size:11px;font-weight:500;color:var(--text-bright);letter-spacing:1px;text-transform:uppercase;}
+.sct{margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--text-dim);background:var(--surface2);padding:2px 7px;border-radius:4px;}
+.cv{margin-left:6px;font-size:10px;color:var(--text-dim);transition:transform .2s;}
+.sec.col .cv{transform:rotate(-90deg);}
+.sec.col .sb{display:none;}
+.sb{padding:16px 18px;}
+.otxt{font-size:14px;line-height:1.75;color:var(--text);}
+.pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:9px;}
+.pcard{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:13px;}
+.pn{font-weight:500;color:var(--text-bright);font-size:14px;margin-bottom:2px;}
+.pr{font-family:var(--mono);font-size:11px;color:var(--accent);margin-bottom:6px;}
+.pd{font-size:12px;color:var(--text-dim);line-height:1.55;}
+.pl{display:flex;gap:6px;margin-top:8px;}
+.lc{font-family:var(--mono);font-size:10px;color:var(--accent);border:1px solid rgba(61,133,245,.3);padding:2px 7px;border-radius:3px;text-decoration:none;}
+/* WORKPLACE-IT TABLE */
+.itab{width:100%;border-collapse:collapse;font-size:12px;}
+.itab tr{border-bottom:1px solid var(--border);}
+.itab tr:last-child{border-bottom:none;}
+.itab td:first-child{font-family:var(--mono);font-size:10px;color:var(--text-dim);letter-spacing:1px;text-transform:uppercase;padding:10px 16px 10px 0;width:150px;vertical-align:top;}
+.itab td:last-child{padding:10px 0;color:var(--text);}
+.tags{display:flex;flex-wrap:wrap;gap:6px;}
+.tag{font-family:var(--mono);font-size:11px;padding:2px 9px;border-radius:4px;border:1px solid;}
+.t-nb{color:#7dd3fc;border-color:rgba(125,211,252,.3);background:rgba(125,211,252,.05);}
+.t-pr{color:#a78bfa;border-color:rgba(167,139,250,.3);background:rgba(167,139,250,.05);}
+.t-nw{color:#6ee7b7;border-color:rgba(110,231,183,.3);background:rgba(110,231,183,.05);}
+.t-ph{color:#fcd34d;border-color:rgba(252,211,77,.3);background:rgba(252,211,77,.05);}
+.t-sv{color:#f9a8d4;border-color:rgba(249,168,212,.3);background:rgba(249,168,212,.05);}
+.t-sw{color:#fdba74;border-color:rgba(253,186,116,.3);background:rgba(253,186,116,.05);}
+.inote{font-size:12px;color:var(--text-dim);line-height:1.6;margin-top:12px;padding-top:12px;border-top:1px solid var(--border);}
+/* OFFER CARDS */
+.ogrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px;}
+.ocard{background:var(--surface2);border:1px solid var(--border);border-radius:9px;padding:14px;position:relative;overflow:hidden;}
+.ocard::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;}
+.ocard.oh::before{background:var(--accent3);}
+.ocard.om::before{background:var(--accent2);}
+.ocard.ol::before{background:var(--text-dim);}
+.ok{font-family:var(--mono);font-size:10px;color:var(--accent);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:5px;}
+.on2{font-size:13px;color:var(--text-bright);font-weight:500;margin-bottom:6px;}
+.od{font-size:12px;color:var(--text-dim);line-height:1.55;}
+.ovol{display:inline-block;font-family:var(--mono);font-size:10px;padding:2px 8px;border-radius:3px;background:rgba(46,204,113,.1);color:var(--accent3);border:1px solid rgba(46,204,113,.2);margin-top:8px;}
+.otrig{font-size:11px;color:var(--text-dim);margin-top:6px;line-height:1.5;}
+.slist{display:flex;flex-direction:column;gap:8px;}
+.sitem{display:flex;gap:11px;align-items:flex-start;padding:10px 13px;background:var(--surface2);border-radius:8px;border:1px solid var(--border);}
+.sdot{width:7px;height:7px;border-radius:50%;margin-top:5px;flex-shrink:0;}
+.sdot.high{background:var(--accent3);box-shadow:0 0 5px rgba(46,204,113,.5);}
+.sdot.medium{background:var(--accent2);box-shadow:0 0 5px rgba(240,165,0,.4);}
+.sdot.low{background:var(--text-dim);}
+.sc2{flex:1;}
+.stit{font-size:13px;color:var(--text-bright);font-weight:500;margin-bottom:2px;}
+.sdsc{font-size:12px;color:var(--text-dim);line-height:1.5;}
+.ssrc{font-family:var(--mono);font-size:10px;color:var(--accent);margin-top:3px;}
+.ppgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:9px;}
+.ppcard{background:var(--surface2);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:8px;padding:12px;}
+.ppcard.high-priority{border-left-color:var(--danger);}
+.ppcard.medium-priority{border-left-color:var(--accent2);}
+.ppt{font-size:13px;color:var(--text-bright);font-weight:500;margin-bottom:3px;}
+.ppd{font-size:12px;color:var(--text-dim);line-height:1.5;}
+.sbox{background:linear-gradient(135deg,rgba(61,133,245,.06),rgba(26,95,212,.03));border:1px solid rgba(61,133,245,.2);border-radius:10px;padding:16px;}
+.sbox h4{font-family:var(--mono);font-size:10px;color:var(--accent);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;}
+.sbox p{font-size:14px;line-height:1.7;color:var(--text);}
+.alist{margin-top:13px;display:flex;flex-direction:column;gap:6px;}
+.ai{display:flex;gap:9px;align-items:flex-start;font-size:13px;color:var(--text);}
+.ai::before{content:'>';color:var(--accent);font-family:var(--mono);flex-shrink:0;}
+.divv{height:1px;background:var(--border);margin:12px 0;}
+.srclist{display:flex;flex-direction:column;gap:6px;}
+.srci{display:flex;gap:9px;align-items:flex-start;padding:8px 11px;background:var(--surface2);border-radius:6px;border:1px solid var(--border);}
+.srcn{font-family:var(--mono);font-size:10px;color:var(--text-dim);padding:1px 6px;background:var(--border);border-radius:3px;flex-shrink:0;margin-top:1px;}
+.srct{font-size:12px;color:var(--text);margin-bottom:1px;}
+.srcu{font-family:var(--mono);font-size:10px;color:var(--text-dim);word-break:break-all;}
+.cbar{display:flex;align-items:center;gap:9px;margin-bottom:11px;}
+.clbl{font-family:var(--mono);font-size:10px;color:var(--text-dim);letter-spacing:1px;text-transform:uppercase;width:90px;flex-shrink:0;}
+.cw{flex:1;height:4px;background:var(--surface2);border-radius:2px;overflow:hidden;}
+.cf{height:100%;border-radius:2px;transition:width 1s ease;}
+.cv2{font-family:var(--mono);font-size:11px;color:var(--text-dim);width:32px;text-align:right;}
+.foot{text-align:center;font-family:var(--mono);font-size:10px;color:var(--text-dim);margin-top:40px;opacity:.35;letter-spacing:1px;}
+/* MODAL */
+.mover{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:100;display:none;align-items:center;justify-content:center;padding:20px;}
+.mover.on{display:flex;}
+.modal{background:var(--surface);border:1px solid var(--border-bright);border-radius:14px;width:100%;max-width:560px;max-height:90vh;overflow-y:auto;}
+.mhdr{display:flex;align-items:center;gap:11px;padding:18px 22px;border-bottom:1px solid var(--border);}
+.mhdr h3{font-family:var(--mono);font-size:13px;color:var(--text-bright);flex:1;}
+.mcl{background:none;border:none;color:var(--text-dim);font-size:22px;cursor:pointer;line-height:1;padding:0 3px;}
+.mcl:hover{color:var(--text-bright);}
+.mbdy{padding:22px;}
+.tabr{display:flex;border-bottom:1px solid var(--border);margin-bottom:18px;}
+.tabt{padding:9px 16px;font-family:var(--mono);font-size:11px;color:var(--text-dim);background:none;border:none;border-bottom:2px solid transparent;cursor:pointer;transition:all .2s;margin-bottom:-1px;}
+.tabt.on{color:var(--hs);border-bottom-color:var(--hs);}
+.tabp{display:none;}
+.tabp.on{display:block;}
+.mig{margin-bottom:14px;}
+.mig label{display:block;font-family:var(--mono);font-size:10px;color:var(--text-dim);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:5px;}
+.mhint{font-size:11px;color:var(--text-dim);margin-top:4px;line-height:1.5;}
+.mhint a{color:var(--accent);}
+.hss{padding:9px 13px;border-radius:6px;font-size:12px;margin-top:10px;display:none;line-height:1.5;}
+.hss.on{display:block;}
+.hss.ok{background:rgba(46,204,113,.1);border:1px solid rgba(46,204,113,.3);color:var(--accent3);}
+.hss.er{background:rgba(224,85,85,.08);border:1px solid rgba(224,85,85,.3);color:var(--danger);}
+.hss.ld{background:rgba(61,133,245,.08);border:1px solid rgba(61,133,245,.2);color:var(--accent);}
+.mbtn{width:100%;padding:11px;border-radius:8px;border:none;cursor:pointer;font-family:var(--mono);font-size:13px;transition:all .2s;margin-top:6px;}
+.mbtn.p{background:var(--hs);color:#fff;}
+.mbtn.p:hover{background:#e86b4a;}
+.mbtn.p:disabled{opacity:.5;cursor:not-allowed;}
+.mbtn.s{background:var(--surface2);color:var(--text-dim);border:1px solid var(--border);margin-top:7px;}
+.mbtn.s:hover{color:var(--text-bright);}
+.hfl{display:flex;flex-direction:column;gap:5px;margin-bottom:18px;}
+.hfr{display:grid;grid-template-columns:1fr 1fr;gap:7px;padding:7px 11px;background:var(--surface2);border-radius:6px;border:1px solid var(--border);font-size:11px;}
+.hfn{font-family:var(--mono);color:var(--accent2);}
+.hfd{color:var(--text-dim);}
+.hft{font-family:var(--mono);font-size:10px;color:var(--text-dim);grid-column:1 / -1;}
+@media print{
+  body{background:#fff;color:#111;font-family:'Segoe UI',Arial,sans-serif;}
+  body::before{display:none;}
+  .card,.tbar,.sbar,.go,.chip,.hdr-ico,.cv,.foot,.mover{display:none!important;}
+  .wrap{padding:16px;max-width:100%;}
+  .sec{border:1px solid #ddd;border-radius:0;page-break-inside:avoid;margin-bottom:10px;}
+  .sb{display:block!important;}
+  .sh{background:#f5f7fa;border-bottom:1px solid #ddd;padding:9px 13px;cursor:default;}
+  .st{color:#333;}.si{background:#e8ecf4;}.rco{color:#111;}.rsu{color:#666;}.otxt{color:#333;}
+  .tag,.ovol{border:1px solid #ccc;color:#333;background:#f5f5f5;}
+  .pcard,.sitem,.srci,.ppcard,.ocard{border:1px solid #ddd;background:#fafafa;}
+  .stit,.ppt,.on2,.srct,.pn{color:#111;}.sdsc,.ppd,.od,.pd,.srcu,.pr{color:#555;}
+  .sbox{border:1pt solid #3d85f5;background:#f0f5ff;}.sbox p,.ai{color:#333;}.ai::before{color:#3d85f5;}
+  .spill{border:1px solid #999;color:#333;background:#eee;}
+  .cf{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+  @page{margin:2cm;}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<div class="hdr">
+  <div class="hdr-ico">&#128269;</div>
+  <div>
+    <h1>IT Sales Intelligence Agent</h1>
+    <p>Entscheider &middot; Workplace-IT &middot; Angebotsansaetze &middot; HubSpot</p>
+  </div>
+  <div class="badge">Systemhaus v3</div>
+</div>
+
+<!-- API KEY CARD -->
+<div class="card" id="keycard" style="border-color:rgba(61,133,245,.35);">
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+    <div style="font-size:15px;">&#128273;</div>
+    <div>
+      <div style="font-family:var(--mono);font-size:11px;color:var(--text-bright);font-weight:500;">Anthropic API-Key</div>
+      <div style="font-family:var(--mono);font-size:10px;color:var(--text-dim);margin-top:2px;">Einmalig eingeben &mdash; wird im Browser gespeichert</div>
+    </div>
+    <div id="keystatus" style="margin-left:auto;font-family:var(--mono);font-size:10px;padding:3px 9px;border-radius:4px;display:none;"></div>
+  </div>
+  <div style="display:flex;gap:10px;">
+    <input type="password" id="apikey" placeholder="sk-ant-api03-..." style="flex:1;" oninput="checkKey()" />
+    <button onclick="saveKey()" style="padding:10px 16px;background:var(--accent);border:none;border-radius:8px;color:#fff;font-family:var(--mono);font-size:12px;cursor:pointer;white-space:nowrap;">Speichern</button>
+  </div>
+  <div style="font-size:11px;color:var(--text-dim);margin-top:8px;line-height:1.6;">
+    Key holen: <a href="https://console.anthropic.com/settings/keys" target="_blank" style="color:var(--accent);">console.anthropic.com &#x2192;</a> &nbsp;|&nbsp; Wird nur lokal im Browser gespeichert, nie uebertragen.
+  </div>
+</div>
+
+<div class="card">
+  <div class="row2">
+    <div class="fg"><label class="lbl">Unternehmen *</label><input type="text" id="co" placeholder="z.B. Stadtwerke Nuernberg GmbH" /></div>
+    <div class="fg"><label class="lbl">Standort / Region</label><input type="text" id="loc" placeholder="z.B. Nuernberg, Bayern" /></div>
+  </div>
+  <div class="fg" style="margin-bottom:14px;"><label class="lbl">Branche (optional)</label><input type="text" id="ind" placeholder="z.B. Oeffentliche Verwaltung, Produktion, Gesundheit..." /></div>
+  <label class="lbl" style="margin-bottom:9px;">Analyseschwerpunkte</label>
+  <div class="chips">
+    <div class="chip on" data-k="entscheider" onclick="tc(this)">Entscheider</div>
+    <div class="chip on" data-k="buero_it" onclick="tc(this)">Workplace-IT</div>
+    <div class="chip on" data-k="angebote" onclick="tc(this)">Angebotsansaetze</div>
+    <div class="chip on" data-k="partner" onclick="tc(this)">IT-Partner</div>
+    <div class="chip on" data-k="signale" onclick="tc(this)">Investitionssignale</div>
+    <div class="chip on" data-k="bilanzen" onclick="tc(this)">Bilanzen</div>
+  </div>
+  <button class="go" id="gobtn" onclick="go()">&#128269; Analyse starten</button>
+</div>
+
+<div class="sbar" id="sbar"><div class="spin"></div><span id="stxt" style="color:var(--text);font-size:12px;">Recherchiere...</span></div>
+<div class="err" id="errbox"></div>
+
+<div class="tbar" id="tbar">
+  <span style="font-family:var(--mono);font-size:10px;color:var(--text-dim);letter-spacing:2px;text-transform:uppercase;">Export</span>
+  <button class="tbtn pdf" onclick="xpdf()">&#128196; PDF</button>
+  <button class="tbtn doc" onclick="xdoc()">&#128196; Word</button>
+  <div class="tsep"></div>
+  <button class="tbtn hs" onclick="openhs()">&#128200; In HubSpot speichern</button>
+</div>
+
+<div id="res"></div>
+<div class="foot">IT SALES INTELLIGENCE &middot; POWERED BY CLAUDE AI &middot; ANTHROPIC</div>
+</div>
+
+<div class="mover" id="hsmov" onclick="if(event.target===this)closehs()">
+<div class="modal">
+  <div class="mhdr"><span style="font-size:17px">&#128992;</span><h3>HubSpot Integration</h3><button class="mcl" onclick="closehs()">x</button></div>
+  <div class="mbdy">
+    <div class="tabr">
+      <button class="tabt on" onclick="stab('save')">Speichern</button>
+      <button class="tabt" onclick="stab('felder')">Felder einrichten</button>
+      <button class="tabt" onclick="stab('sharepoint')">SharePoint-Tipp</button>
+    </div>
+    <div class="tabp on" id="tab-save">
+      <div class="mig"><label>Private App Token</label><input type="password" id="tok" placeholder="pat-eu1-xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" /><div class="mhint">Nur lokal, nie gespeichert. <a href="https://app.hubspot.com/private-apps" target="_blank">HubSpot Private Apps &#x2192;</a> (Rechte: companies read+write)</div></div>
+      <div class="mig"><label>Firma suchen</label><input type="text" id="hssearch" placeholder="Firmenname..." /><div class="mhint">Leer lassen = neue Firma anlegen</div></div>
+      <div id="hsres" style="display:none;margin-bottom:11px;"></div>
+      <button class="mbtn s" onclick="searchhs()">&#128269; Firma suchen</button>
+      <button class="mbtn p" id="savebtn" onclick="saveks()">&#128200; In HubSpot speichern</button>
+      <div class="hss" id="hsmsg"></div>
+    </div>
+    <div class="tabp" id="tab-felder">
+      <p style="font-family:var(--mono);font-size:10px;color:var(--accent);letter-spacing:2px;text-transform:uppercase;margin-bottom:10px;">Custom Properties anlegen</p>
+      <p style="font-size:11px;color:var(--text-dim);margin-bottom:13px;line-height:1.6;"><strong style="color:var(--text)">Einstellungen &#x2192; Eigenschaften &#x2192; Unternehmen &#x2192; Eigenschaft erstellen</strong><br>Neue Gruppe: <em style="color:var(--accent2)">IT Intelligence</em></p>
+      <div class="hfl" id="hflist"></div>
+    </div>
+    <div class="tabp" id="tab-sharepoint">
+      <p style="font-family:var(--mono);font-size:10px;color:var(--accent);letter-spacing:2px;text-transform:uppercase;margin-bottom:12px;">SharePoint-Einbindung (Microsoft 365)</p>
+      <div style="background:rgba(61,133,245,.07);border:1px solid rgba(61,133,245,.2);border-radius:8px;padding:14px;margin-bottom:10px;">
+        <p style="font-family:var(--mono);font-size:10px;color:var(--accent);letter-spacing:1px;margin-bottom:7px;">SCHRITT 1 &mdash; Datei hochladen</p>
+        <p style="font-size:12px;color:var(--text-dim);line-height:1.65;">SharePoint &#x2192; Dokumentenbibliothek "Vertrieb" &#x2192; <strong style="color:var(--text)">it-sales-agent.html</strong> hochladen &#x2192; Rechtsklick &#x2192; "Link kopieren" &#x2192; "Jeder in der Organisation"</p>
+      </div>
+      <div style="background:rgba(61,133,245,.07);border:1px solid rgba(61,133,245,.2);border-radius:8px;padding:14px;margin-bottom:10px;">
+        <p style="font-family:var(--mono);font-size:10px;color:var(--accent);letter-spacing:1px;margin-bottom:7px;">SCHRITT 2 &mdash; Als SharePoint-Seite einbetten (empfohlen)</p>
+        <p style="font-size:12px;color:var(--text-dim);line-height:1.65;">SharePoint-Seite anlegen &#x2192; Bearbeiten &#x2192; Webpart hinzufuegen &#x2192; <strong style="color:var(--text)">"Einbetten"</strong> &#x2192; HTML-Code der Datei einfuegen. So laeuft der Agent direkt im Intranet.</p>
+      </div>
+      <div style="background:rgba(255,122,89,.07);border:1px solid rgba(255,122,89,.2);border-radius:8px;padding:14px;">
+        <p style="font-family:var(--mono);font-size:10px;color:var(--hs);letter-spacing:1px;margin-bottom:7px;">SCHRITT 3 &mdash; In HubSpot verlinken</p>
+        <p style="font-size:12px;color:var(--text-dim);line-height:1.65;"><strong style="color:var(--text)">Navigation:</strong> HubSpot &#x2192; Einstellungen &#x2192; Navigation &#x2192; Benutzerdefinierter Link &#x2192; SharePoint-URL eintragen<br><br><strong style="color:var(--text)">Dashboard-Widget:</strong> Dashboard &#x2192; Widget hinzufuegen &#x2192; iFrame &#x2192; URL</p>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<script>
+var AF=new Set(['entscheider','buero_it','angebote','partner','signale','bilanzen']);
+var RES=null,HSID=null;
+
+var HF=[
+  {n:'it_sales_potenzial',l:'IT Sales Potenzial',t:'Dropdown',d:'high / medium / low'},
+  {n:'it_analyse_datum',l:'IT Analysedatum',t:'Datum',d:'Datum der letzten Recherche'},
+  {n:'it_entscheider',l:'IT Entscheider',t:'Mehrzeiliger Text',d:'Name, Position, Kontakt'},
+  {n:'it_workplace_it',l:'Workplace-IT Infrastruktur',t:'Mehrzeiliger Text',d:'Endgeraete, Drucker, Netzwerk, Telefonie, Server'},
+  {n:'it_partner_aktuell',l:'Aktuelle IT-Partner',t:'Mehrzeiliger Text',d:'Bestehende Systemhaeuser und Lieferanten'},
+  {n:'it_angebotsansaetze',l:'Angebotsansaetze Systemhaus',t:'Mehrzeiliger Text',d:'Konkrete Angebotspotenziale fuer uns'},
+  {n:'it_investitionssignale',l:'Investitionssignale',t:'Mehrzeiliger Text',d:'Aktuelle Signale fuer IT-Investitionen'},
+  {n:'it_pain_points',l:'IT Pain Points',t:'Mehrzeiliger Text',d:'Identifizierte IT-Bedarfe'},
+  {n:'it_sales_pitch',l:'IT Sales Pitch',t:'Mehrzeiliger Text',d:'Hauptaufhaenger und naechste Schritte'},
+  {n:'it_budget_schaetzung',l:'Geschaetztes IT-Budget p.a.',t:'Einzeiliger Text',d:'Jahresbudget Schaetzung'},
+  {n:'it_jahresumsatz',l:'Jahresumsatz',t:'Einzeiliger Text',d:'Aus Bilanz/Jahresbericht'},
+  {n:'it_offene_punkte',l:'Offene Recherchepunkte',t:'Mehrzeiliger Text',d:'Noch zu recherchieren'},
+  {n:'it_quellen',l:'Recherchequellen',t:'Mehrzeiliger Text',d:'URLs und Quellenangaben'},
+];
+
+var SYS="Du bist IT-Sales-Analyst bei einem deutschen IT-Systemhaus (130 Mitarbeiter). Analysiere das Unternehmen aus Systemhaus-Perspektive: Welche Bueround Workplace-IT setzen sie ein, und was koennen WIR als Systemhaus konkret anbieten?\n\nWAS WIR ALS SYSTEMHAUS LIEFERN:\n- ENDGERAETE: Notebooks, Desktops, Thin Clients, Monitore, Tablets, Smartphones + MDM\n- DRUCKEN: MFP, Drucker, Managed Print Services, Miet-/Leasingvertraege (Konica Minolta, Kyocera, Canon, Ricoh, HP)\n- NETZWERK: Switches, WLAN-APs, Firewalls/UTM, SD-WAN (Cisco, HP Aruba, Extreme Networks, Fortinet, Sophos)\n- TELEFONIE/UC: TK-Anlage, IP-Telefonie, Teams Phone, STARFACE, 3CX, Mitel, Cisco\n- SERVER/STORAGE: on-premise Server (HPE, Dell), NAS, Backup-Systeme, USV\n- WORKPLACE SOFTWARE: Windows, Microsoft 365, Endpoint-Security, MDM (Intune/JAMF)\n- MANAGED SERVICES: Helpdesk, Device-as-a-Service, Managed Network, Backup-aaS, Security-aaS\n\nRechercheStrategie:\n1. Stellenanzeigen Indeed/Stepstone/Xing: Begriffe wie Windows, Intune, Helpdesk, Drucker, Netzwerk, Teams Phone zeigen den eingesetzten Stack\n2. Ausschreibungen ted.europa.eu/bund.de/evergabe.de/DTVP: Hardware-Lose, Druckloesungen, Netzwerktechnik, Telefonie\n3. Bundesanzeiger.de: Mitarbeiterzahl bestimmt Geraetezahl (Faustregel: pro MA 1 Notebook/PC, 0.5 Monitor, 0.1 MFP)\n4. Website/Karriereseite: Technologiepartner-Logos, eingesetzte Systeme\n5. LinkedIn/Xing: Skills der IT-Mitarbeiter zeigen Stack\n6. Google News: Standorterweiterungen, Umzuege, Wachstum\n\nAntworte AUSSCHLIESSLICH mit validem JSON. Starte direkt mit { und ende mit }:\n{\"company\":\"Name\",\"location\":\"Ort\",\"industry\":\"Branche\",\"company_size\":\"MA und Umsatz\",\"sales_potential\":\"high|medium|low\",\"sales_potential_reason\":\"Konkrete Begruendung\",\"confidence\":{\"entscheider\":0,\"infrastruktur\":0,\"partner\":0,\"investitionen\":0},\"overview\":\"2-3 Saetze aus Systemhaus-Sicht\",\"decision_makers\":[{\"name\":\"Name\",\"role\":\"Position\",\"relevance\":\"CIO/IT-Leiter/GF\",\"notes\":\"Details Projekte Fokus\",\"linkedin\":\"URL oder null\",\"xing\":\"URL oder null\"}],\"buero_it\":{\"endgeraete\":{\"notebooks\":[\"Hersteller/Modell\"],\"desktops\":[\"Hersteller\"],\"monitore\":[\"Hersteller\"],\"tablets\":[\"Modell\"],\"smartphones\":[\"Modell\"]},\"drucken\":{\"mfp\":[\"Hersteller\"],\"managed_print\":\"ja/nein/unbekannt\",\"vertrag_ablauf\":\"Datum oder unbekannt\"},\"netzwerk\":{\"switches\":[\"Hersteller\"],\"wlan\":[\"Hersteller\"],\"firewall\":[\"Hersteller\"]},\"telefonie\":{\"system\":[\"System\"],\"typ\":\"TK-Anlage/UCaaS/Teams Phone\",\"alter\":\"Alter in Jahren oder unbekannt\",\"anzahl\":\"Nebenstellen\"},\"server_storage\":{\"server\":[\"Hersteller\"],\"backup\":[\"Loesung\"],\"hosting\":\"on-premise/cloud/hybrid\"},\"workplace_software\":{\"os\":[\"Windows Version\"],\"office365\":\"ja/nein/unbekannt\",\"mdm\":[\"Loesung\"],\"endpoint_security\":[\"Hersteller\"]},\"geraete_hochrechnung\":\"Schaetzung: X Notebooks/PCs, Y Monitore, Z MFP\",\"detail\":\"Was ist bekannt und aus welchen Quellen\"},\"it_partners\":[{\"name\":\"Systemhaus oder Lieferant\",\"type\":\"Systemhaus/Haendler/Direktvertrag/Leasing\",\"evidence\":\"Quelle\",\"since\":\"Seit oder null\",\"contract_end\":\"Vertragsende oder null\"}],\"investment_signals\":[{\"title\":\"Signal\",\"description\":\"Details\",\"priority\":\"high|medium|low\",\"source\":\"Quelle\",\"date\":\"Datum oder null\"}],\"financial_info\":{\"revenue\":\"Umsatz\",\"employees\":\"MA\",\"it_budget_estimate\":\"Geschaetztes Budget p.a. mit Herleitung\",\"annual_report_url\":\"URL oder null\",\"notes\":\"Kennzahlen\"},\"systemhaus_angebote\":[{\"kategorie\":\"zB Notebook-Flotte Refresh\",\"beschreibung\":\"Konkreter Angebotsansatz\",\"volumen_schaetzung\":\"EUR-Schaetzung\",\"prioritaet\":\"high|medium|low\",\"trigger\":\"Was loest den Bedarf aus\"}],\"pain_points\":[{\"title\":\"IT-Bedarf\",\"description\":\"Warum jetzt und was wir liefern koennen\",\"priority\":\"high|medium|low\"}],\"sales_angles\":{\"main_pitch\":\"Staerkster Aufhaenger fuer uns als Systemhaus\",\"action_items\":[\"Naechster Schritt 1\",\"Naechster Schritt 2\",\"Naechster Schritt 3\"]},\"sources\":[{\"title\":\"Quelle\",\"url\":\"URL\",\"relevance\":\"Was entnommen\"}],\"data_gaps\":[\"Was noch fehlt\"]}";
+
+function saveKey(){
+  var k=document.getElementById('apikey').value.trim();
+  if(!k){return;}
+  localStorage.setItem('ant_key',k);
+  showKeyStatus(k);
+}
+function loadKey(){
+  var k=localStorage.getItem('ant_key')||'';
+  if(k){document.getElementById('apikey').value=k;showKeyStatus(k);}
+}
+function checkKey(){
+  var k=document.getElementById('apikey').value.trim();
+  if(k.startsWith('sk-ant')){showKeyStatus(k);}
+}
+function showKeyStatus(k){
+  var el=document.getElementById('keystatus');
+  if(k&&k.length>20){
+    el.textContent='Key gespeichert ('+k.slice(0,12)+'***)';
+    el.style.cssText='margin-left:auto;font-family:var(--mono);font-size:10px;padding:3px 9px;border-radius:4px;display:block;background:rgba(46,204,113,.1);color:var(--accent3);border:1px solid rgba(46,204,113,.2);';
+  }
+}
+function getKey(){
+  return document.getElementById('apikey').value.trim()||localStorage.getItem('ant_key')||'';
+}
+
+function tc(el){var k=el.dataset.k;if(AF.has(k)){AF.delete(k);el.classList.remove('on');}else{AF.add(k);el.classList.add('on');}}
+
+function parseJ(r){
+  if(!r)return null;
+  var s=r.replace(/```json\s*/gi,'').replace(/```\s*/g,'').trim();
+  try{return JSON.parse(s);}catch(e){}
+  var a=s.indexOf('{'),b=s.lastIndexOf('}');
+  if(a<0||b<0||b<=a)return null;
+  var c=s.slice(a,b+1);
+  try{return JSON.parse(c);}catch(e){}
+  var d=0,lv=-1;
+  for(var i=0;i<c.length;i++){if(c[i]==='{')d++;else if(c[i]==='}'){d--;if(d===0){lv=i;break;}}}
+  if(lv>0){try{return JSON.parse(c.slice(0,lv+1));}catch(e){}}
+  try{return JSON.parse(c.replace(/,\s*}/g,'}').replace(/,\s*]/g,']'));}catch(e){}
+  return null;
+}
+
+async function go(){
+  var co=document.getElementById('co').value.trim();
+  if(!co){document.getElementById('co').focus();return;}
+  var apiKey=getKey();
+  if(!apiKey){
+    var eb=document.getElementById('errbox');
+    eb.textContent='Bitte zuerst den Anthropic API-Key oben eingeben und speichern.';
+    eb.classList.add('on');
+    document.getElementById('apikey').focus();
+    return;
+  }
+  var loc=document.getElementById('loc').value.trim(),ind=document.getElementById('ind').value.trim();
+  document.getElementById('errbox').classList.remove('on');
+  document.getElementById('res').classList.remove('on');
+  document.getElementById('res').innerHTML='';
+  document.getElementById('tbar').classList.remove('on');
+  document.getElementById('sbar').classList.add('on');
+  document.getElementById('gobtn').disabled=true;
+  RES=null;
+  var up='Analysiere das Unternehmen: "'+co+'"'+(loc?', Standort: '+loc:'')+(ind?', Branche: '+ind:'')+'\nFokus: '+Array.from(AF).join(', ')+'\nNutze intensiv Websuche: Website, LinkedIn, Xing, Bundesanzeiger, Stellenanzeigen (Indeed/Stepstone), Google News, oeffentliche Ausschreibungen (ted.europa.eu, evergabe.de). Beginne die JSON-Antwort direkt mit {';
+  try{
+    document.getElementById('stxt').textContent='Recherchiert Stellenanzeigen, Ausschreibungen, Bilanzen...';
+    var resp=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:8000,system:SYS,tools:[{type:'web_search_20250305',name:'web_search'}],messages:[{role:'user',content:up}]})});
+    if(!resp.ok){var e=await resp.json();throw new Error(e.error&&e.error.message||'HTTP '+resp.status);}
+    document.getElementById('stxt').textContent='Verarbeite Ergebnisse...';
+    var data=await resp.json();
+    var raw=data.content.filter(function(b){return b.type==='text';}).map(function(b){return b.text;}).join('');
+    RES=parseJ(raw);
+    if(!RES){console.error('RAW:',raw.slice(0,400));throw new Error('Antwort konnte nicht verarbeitet werden. Bitte erneut versuchen.');}
+    document.getElementById('sbar').classList.remove('on');
+    render(RES);
+    document.getElementById('tbar').classList.add('on');
+    if(document.getElementById('hssearch'))document.getElementById('hssearch').value=RES.company||'';
+  }catch(err){
+    document.getElementById('sbar').classList.remove('on');
+    var eb=document.getElementById('errbox');eb.textContent='Fehler: '+err.message;eb.classList.add('on');
+  }finally{document.getElementById('gobtn').disabled=false;}
+}
+
+function e(v){if(!v)return'';return String(v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+function mkSec(ico,ttl,cnt,col){
+  var s=document.createElement('div');s.className='sec'+(col?' col':'');
+  s.innerHTML='<div class="sh" onclick="this.parentElement.classList.toggle(\'col\')"><div class="si">'+ico+'</div><span class="st">'+ttl+'</span>'+(cnt!==''?'<span class="sct">'+cnt+'</span>':'')+'<span class="cv">&#9660;</span></div><div class="sb"></div>';
+  return s;
+}
+
+function render(d){
+  var C=document.getElementById('res');C.innerHTML='';
+  var sc={high:'h',medium:'m',low:'l'}[d.sales_potential]||'l';
+  var sl={high:'HOHES POTENZIAL',medium:'MITTLERES POTENZIAL',low:'NIEDRIGES POTENZIAL'}[d.sales_potential]||'UNBEKANNT';
+  var h=document.createElement('div');h.className='rhdr';
+  h.innerHTML='<div><div class="rco">'+e(d.company||'')+'</div><div class="rsu">'+[d.location,d.industry,d.company_size].filter(Boolean).map(e).join(' &middot; ')+'</div></div><div class="spill '+sc+'">'+sl+'</div>';
+  C.appendChild(h);
+
+  // confidence
+  var conf=d.confidence||{};
+  var cs=mkSec('&#128202;','DATEN-KONFIDENZ','',false);
+  [['entscheider','Entscheider'],['infrastruktur','Infrastruktur'],['partner','IT-Partner'],['investitionen','Investitionen']].forEach(function(r){
+    var v=conf[r[0]]||0;var c=v>=70?'#2ecc71':v>=40?'#f0a500':'#5a7099';
+    cs.querySelector('.sb').innerHTML+='<div class="cbar"><span class="clbl">'+r[1]+'</span><div class="cw"><div class="cf" style="width:'+v+'%;background:'+c+'"></div></div><span class="cv2">'+v+'%</span></div>';
+  });
+  C.appendChild(cs);
+
+  // overview
+  if(d.overview){var ov=mkSec('&#127968;','UNTERNEHMENSUEBERBLICK','',false);ov.querySelector('.sb').innerHTML='<p class="otxt">'+e(d.overview)+'</p>'+(d.sales_potential_reason?'<div class="divv"></div><p class="otxt" style="font-size:13px;color:var(--accent2)">'+e(d.sales_potential_reason)+'</p>':'');C.appendChild(ov);}
+
+  // entscheider
+  if(AF.has('entscheider')&&d.decision_makers&&d.decision_makers.length){
+    var dm=mkSec('&#128100;','ENTSCHEIDER',d.decision_makers.length,false);
+    var g=document.createElement('div');g.className='pgrid';
+    d.decision_makers.forEach(function(p){
+      var lk=(p.linkedin?'<a class="lc" href="'+p.linkedin+'" target="_blank">LinkedIn</a>':'')+(p.xing?'<a class="lc" href="'+p.xing+'" target="_blank">Xing</a>':'');
+      g.innerHTML+='<div class="pcard"><div class="pn">'+e(p.name)+'</div><div class="pr">'+e(p.role)+'</div><div class="pd">'+e(p.notes||'')+'</div>'+(lk?'<div class="pl">'+lk+'</div>':'')+'</div>';
+    });
+    dm.querySelector('.sb').appendChild(g);C.appendChild(dm);
+  }
+
+  // WORKPLACE IT - neue Hauptsektion
+  if(AF.has('buero_it')&&d.buero_it){
+    var bi=d.buero_it;
+    var ws=mkSec('&#128187;','WORKPLACE-IT INFRASTRUKTUR','',false);
+    var body=ws.querySelector('.sb');
+    var rows='';
+    var eg=bi.endgeraete||{};
+    var allEG=[].concat(eg.notebooks||[],eg.desktops||[],eg.monitore||[],eg.tablets||[],eg.smartphones||[]);
+    if(allEG.length){
+      rows+='<tr><td>Endgeraete</td><td><div class="tags">';
+      rows+=(eg.notebooks||[]).map(function(t){return'<span class="tag t-nb">'+e(t)+'</span>';}).join('');
+      rows+=(eg.desktops||[]).map(function(t){return'<span class="tag t-nb">&#128421; '+e(t)+'</span>';}).join('');
+      rows+=(eg.monitore||[]).map(function(t){return'<span class="tag t-nb">&#128444; '+e(t)+'</span>';}).join('');
+      rows+=(eg.tablets||[]).map(function(t){return'<span class="tag t-nb">&#128250; '+e(t)+'</span>';}).join('');
+      rows+=(eg.smartphones||[]).map(function(t){return'<span class="tag t-nb">&#128241; '+e(t)+'</span>';}).join('');
+      rows+='</div></td></tr>';
+    }
+    var pr=bi.drucken||{};
+    if(pr.mfp&&pr.mfp.length){
+      rows+='<tr><td>Drucken / MFP</td><td><div class="tags">'+(pr.mfp||[]).map(function(t){return'<span class="tag t-pr">'+e(t)+'</span>';}).join('')+'</div>';
+      if(pr.managed_print&&pr.managed_print!=='unbekannt')rows+='<div style="font-size:11px;color:var(--text-dim);margin-top:5px;">Managed Print: <strong style="color:var(--text)">'+e(pr.managed_print)+'</strong></div>';
+      if(pr.vertrag_ablauf&&pr.vertrag_ablauf!=='unbekannt')rows+='<div style="font-size:11px;color:var(--accent2);margin-top:3px;">&#9200; Vertragsende: <strong>'+e(pr.vertrag_ablauf)+'</strong></div>';
+      rows+='</td></tr>';
+    }
+    var nw=bi.netzwerk||{};
+    var allNW=[].concat(nw.switches||[],nw.wlan||[],nw.firewall||[]);
+    if(allNW.length){rows+='<tr><td>Netzwerk</td><td><div class="tags">'+(nw.switches||[]).map(function(t){return'<span class="tag t-nw">&#128257; '+e(t)+'</span>';}).join('')+(nw.wlan||[]).map(function(t){return'<span class="tag t-nw">&#128246; '+e(t)+'</span>';}).join('')+(nw.firewall||[]).map(function(t){return'<span class="tag t-nw">&#128737; '+e(t)+'</span>';}).join('')+'</div></td></tr>';}
+    var tf=bi.telefonie||{};
+    if(tf.system&&tf.system.length){
+      var alter=parseInt(tf.alter);
+      rows+='<tr><td>Telefonie / UC</td><td><div class="tags">'+(tf.system||[]).map(function(t){return'<span class="tag t-ph">'+e(t)+'</span>';}).join('')+'</div>';
+      if(tf.typ)rows+='<div style="font-size:11px;color:var(--text-dim);margin-top:5px;">'+e(tf.typ)+'</div>';
+      if(tf.alter&&tf.alter!=='unbekannt')rows+='<div style="font-size:11px;margin-top:3px;color:'+(alter>7?'var(--danger)':'var(--accent2)')+';">Alter: <strong>'+e(tf.alter)+'</strong>'+(alter>7?' &#9888; Erneuerungsbedarf!':'')+'</div>';
+      if(tf.anzahl)rows+='<div style="font-size:11px;color:var(--text-dim);margin-top:2px;">Ca. '+e(tf.anzahl)+' Nebenstellen</div>';
+      rows+='</td></tr>';
+    }
+    var sv=bi.server_storage||{};
+    if((sv.server&&sv.server.length)||(sv.backup&&sv.backup.length)||sv.hosting){
+      rows+='<tr><td>Server / Backup</td><td><div class="tags">'+(sv.server||[]).map(function(t){return'<span class="tag t-sv">'+e(t)+'</span>';}).join('')+(sv.backup||[]).map(function(t){return'<span class="tag t-sv">&#128190; '+e(t)+'</span>';}).join('')+'</div>';
+      if(sv.hosting)rows+='<div style="font-size:11px;color:var(--text-dim);margin-top:5px;">Hosting: <strong style="color:var(--text)">'+e(sv.hosting)+'</strong></div>';
+      rows+='</td></tr>';
+    }
+    var ws2=bi.workplace_software||{};
+    var allSW=[].concat(ws2.os||[],ws2.mdm||[],ws2.endpoint_security||[]);
+    if(allSW.length||ws2.office365){
+      rows+='<tr><td>Workplace-SW</td><td><div class="tags">'+(ws2.os||[]).map(function(t){return'<span class="tag t-sw">'+e(t)+'</span>';}).join('');
+      if(ws2.office365&&ws2.office365!=='unbekannt')rows+='<span class="tag t-sw">M365: '+e(ws2.office365)+'</span>';
+      rows+=(ws2.mdm||[]).map(function(t){return'<span class="tag t-sw">&#128273; '+e(t)+'</span>';}).join('');
+      rows+=(ws2.endpoint_security||[]).map(function(t){return'<span class="tag t-sw">&#128737; '+e(t)+'</span>';}).join('');
+      rows+='</div></td></tr>';
+    }
+    if(bi.geraete_hochrechnung)rows+='<tr><td>Geraete-Schaetzung</td><td><span style="font-size:13px;color:var(--accent2);font-weight:500;">'+e(bi.geraete_hochrechnung)+'</span></td></tr>';
+    body.innerHTML='<table class="itab">'+rows+'</table>';
+    if(bi.detail)body.innerHTML+='<div class="inote">'+e(bi.detail)+'</div>';
+    C.appendChild(ws);
+  }
+
+  // ANGEBOTE - die neue Kernsektion
+  if(AF.has('angebote')&&d.systemhaus_angebote&&d.systemhaus_angebote.length){
+    var ao=mkSec('&#127919;','ANGEBOTSANSAETZE FUER UNS ALS SYSTEMHAUS',d.systemhaus_angebote.length,false);
+    var og=document.createElement('div');og.className='ogrid';
+    d.systemhaus_angebote.forEach(function(o){
+      var pc={high:'oh',medium:'om',low:'ol'}[o.prioritaet]||'ol';
+      og.innerHTML+='<div class="ocard '+pc+'"><div class="ok">'+e(o.kategorie)+'</div><div class="on2">'+e(o.beschreibung||'')+'</div>'+(o.volumen_schaetzung?'<div class="ovol">'+e(o.volumen_schaetzung)+'</div>':'')+(o.trigger?'<div class="otrig">Trigger: '+e(o.trigger)+'</div>':'')+'</div>';
+    });
+    ao.querySelector('.sb').appendChild(og);C.appendChild(ao);
+  }
+
+  // partner
+  if(AF.has('partner')&&d.it_partners&&d.it_partners.length){
+    var pt=mkSec('&#129309;','BESTEHENDE IT-PARTNER',d.it_partners.length,false);
+    pt.querySelector('.sb').innerHTML='<div style="display:flex;flex-wrap:wrap;gap:9px;">'+d.it_partners.map(function(p){return'<div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 13px;min-width:175px"><div style="font-size:13px;color:var(--text-bright);font-weight:500">'+e(p.name)+'</div><div style="font-family:var(--mono);font-size:10px;color:var(--accent2);margin:3px 0">'+e(p.type)+(p.contract_end&&p.contract_end!=='null'?' &middot; <span style="color:var(--danger)">Ende: '+e(p.contract_end)+'</span>':'')+'</div><div style="font-size:11px;color:var(--text-dim)">'+e(p.evidence)+'</div></div>';}).join('')+'</div>';
+    C.appendChild(pt);
+  }
+
+  // signale
+  if(AF.has('signale')&&d.investment_signals&&d.investment_signals.length){
+    var iv=mkSec('&#128200;','INVESTITIONSSIGNALE',d.investment_signals.length,false);
+    var sl2=document.createElement('div');sl2.className='slist';
+    d.investment_signals.forEach(function(s){sl2.innerHTML+='<div class="sitem"><div class="sdot '+s.priority+'"></div><div class="sc2"><div class="stit">'+e(s.title)+'</div><div class="sdsc">'+e(s.description)+'</div>'+(s.source?'<div class="ssrc">'+e(s.source)+(s.date?' &middot; '+e(s.date):'')+'</div>':'')+'</div></div>';});
+    iv.querySelector('.sb').appendChild(sl2);C.appendChild(iv);
+  }
+
+  // finanzen
+  if(AF.has('bilanzen')&&d.financial_info){
+    var fi=d.financial_info;var fc=mkSec('&#128196;','FINANZDATEN','',true);
+    var itms=[];
+    if(fi.revenue)itms.push('<div class="sitem"><div class="sdot medium"></div><div><div class="stit">Jahresumsatz</div><div class="sdsc">'+e(fi.revenue)+'</div></div></div>');
+    if(fi.employees)itms.push('<div class="sitem"><div class="sdot low"></div><div><div class="stit">Mitarbeiter</div><div class="sdsc">'+e(fi.employees)+'</div></div></div>');
+    if(fi.it_budget_estimate)itms.push('<div class="sitem"><div class="sdot high"></div><div><div class="stit">Geschaetztes IT-Budget p.a.</div><div class="sdsc">'+e(fi.it_budget_estimate)+'</div></div></div>');
+    if(fi.notes)itms.push('<div class="sitem"><div class="sdot low"></div><div><div class="stit">Kennzahlen</div><div class="sdsc">'+e(fi.notes)+'</div></div></div>');
+    fc.querySelector('.sb').innerHTML='<div class="slist">'+itms.join('')+'</div>'+(fi.annual_report_url&&fi.annual_report_url!=='null'?'<div style="margin-top:10px"><a href="'+fi.annual_report_url+'" target="_blank" style="font-family:var(--mono);font-size:11px;color:var(--accent)">&#x2192; Jahresbericht</a></div>':'');
+    C.appendChild(fc);
+  }
+
+  // pain points
+  if(d.pain_points&&d.pain_points.length){
+    var pp=mkSec('&#9889;','IT-BEDARFE',d.pain_points.length,false);
+    var ppg=document.createElement('div');ppg.className='ppgrid';
+    d.pain_points.forEach(function(p){ppg.innerHTML+='<div class="ppcard '+p.priority+'-priority"><div class="ppt">'+e(p.title)+'</div><div class="ppd">'+e(p.description)+'</div></div>';});
+    pp.querySelector('.sb').appendChild(ppg);C.appendChild(pp);
+  }
+
+  // sales
+  if(d.sales_angles){
+    var sa=mkSec('&#128161;','SALES-STRATEGIE','',false);
+    sa.querySelector('.sb').innerHTML='<div class="sbox"><h4>Hauptaufhaenger</h4><p>'+e(d.sales_angles.main_pitch||'')+'</p>'+(d.sales_angles.action_items&&d.sales_angles.action_items.length?'<div class="alist">'+d.sales_angles.action_items.map(function(a){return'<div class="ai">'+e(a)+'</div>';}).join('')+'</div>':'')+'</div>';
+    C.appendChild(sa);
+  }
+
+  // gaps
+  if(d.data_gaps&&d.data_gaps.length){
+    var dg=mkSec('&#10067;','OFFENE PUNKTE',d.data_gaps.length,true);
+    dg.querySelector('.sb').innerHTML=d.data_gaps.map(function(g){return'<div style="display:flex;gap:7px;margin-bottom:6px;font-size:13px;color:var(--text-dim)"><span style="color:var(--accent2)">&#183;</span>'+e(g)+'</div>';}).join('');
+    C.appendChild(dg);
+  }
+
+  // sources
+  if(d.sources&&d.sources.length){
+    var src=mkSec('&#128279;','QUELLEN',d.sources.length,true);
+    var sl3=document.createElement('div');sl3.className='srclist';
+    d.sources.forEach(function(s,i){sl3.innerHTML+='<div class="srci"><span class="srcn">'+String(i+1).padStart(2,'0')+'</span><div><div class="srct">'+e(s.title)+' &mdash; '+e(s.relevance||'')+'</div><div class="srcu">'+e(s.url||'')+'</div></div></div>';});
+    src.querySelector('.sb').appendChild(sl3);C.appendChild(src);
+  }
+
+  C.classList.add('on');
+}
+
+function xpdf(){document.querySelectorAll('.sec.col').forEach(function(s){s.classList.remove('col');});window.print();}
+
+function xdoc(){
+  if(!RES)return;var d=RES;
+  var bi=d.buero_it||{};var eg=bi.endgeraete||{};var pr=bi.drucken||{};var nw=bi.netzwerk||{};var tf=bi.telefonie||{};var sv=bi.server_storage||{};var sw=bi.workplace_software||{};
+  var offers=(d.systemhaus_angebote||[]).map(function(o){return'<tr><td style="padding:5px 8px;border:1px solid #ddd"><strong>'+o.kategorie+'</strong></td><td style="padding:5px 8px;border:1px solid #ddd">'+o.beschreibung+'</td><td style="padding:5px 8px;border:1px solid #ddd">'+(o.volumen_schaetzung||'')+'</td><td style="padding:5px 8px;border:1px solid #ddd">'+(o.trigger||'')+'</td></tr>';}).join('');
+  var dm=(d.decision_makers||[]).map(function(p){return'<tr><td style="padding:5px 8px;border:1px solid #ddd"><strong>'+p.name+'</strong></td><td style="padding:5px 8px;border:1px solid #ddd">'+p.role+'</td><td style="padding:5px 8px;border:1px solid #ddd">'+(p.notes||'')+'</td></tr>';}).join('');
+  var fi=d.financial_info||{};
+  var html='<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word"><head><meta charset="UTF-8"><style>body{font-family:Calibri,Arial,sans-serif;font-size:11pt;color:#111;}h1{font-size:16pt;color:#1e3a5f;border-bottom:2pt solid #3d85f5;padding-bottom:5pt;}h2{font-size:12pt;color:#2a4a7f;margin-top:14pt;margin-bottom:4pt;border-left:3pt solid #3d85f5;padding-left:7pt;}table{border-collapse:collapse;width:100%;margin:6pt 0;font-size:10pt;}th{background:#1e3a5f;color:#fff;padding:5px 8px;text-align:left;}.box{background:#f0f5ff;border:1pt solid #3d85f5;padding:8pt 12pt;margin:6pt 0;}</style></head><body>';
+  html+='<h1>IT Sales Intelligence: '+d.company+'</h1>';
+  html+='<p style="color:#666;font-size:9pt">'+[d.location,d.industry,d.company_size].filter(Boolean).join(' | ')+' | Analyse: '+new Date().toLocaleDateString('de-DE')+'</p>';
+  html+='<p>Sales-Potenzial: <strong>'+(d.sales_potential==='high'?'HOCH':d.sales_potential==='medium'?'MITTEL':'NIEDRIG')+'</strong> &mdash; '+(d.sales_potential_reason||'')+'</p>';
+  html+='<h2>Unternehmensueberblick</h2><p>'+(d.overview||'')+'</p>';
+  html+='<h2>Entscheider</h2><table><tr><th>Name</th><th>Position</th><th>Notizen</th></tr>'+dm+'</table>';
+  html+='<h2>Workplace-IT Infrastruktur</h2><table><tr><th>Kategorie</th><th>Erkannte Systeme / Details</th></tr>';
+  html+='<tr><td style="padding:5px 8px;border:1px solid #ddd">Notebooks/PCs</td><td style="padding:5px 8px;border:1px solid #ddd">'+(eg.notebooks||[]).concat(eg.desktops||[]).join(', ')+'</td></tr>';
+  html+='<tr><td style="padding:5px 8px;border:1px solid #ddd">Monitore</td><td style="padding:5px 8px;border:1px solid #ddd">'+(eg.monitore||[]).join(', ')+'</td></tr>';
+  html+='<tr><td style="padding:5px 8px;border:1px solid #ddd">Drucker / MFP</td><td style="padding:5px 8px;border:1px solid #ddd">'+(pr.mfp||[]).join(', ')+(pr.vertrag_ablauf&&pr.vertrag_ablauf!=='unbekannt'?' | Vertragsende: '+pr.vertrag_ablauf:'')+'</td></tr>';
+  html+='<tr><td style="padding:5px 8px;border:1px solid #ddd">Netzwerk</td><td style="padding:5px 8px;border:1px solid #ddd">'+(nw.switches||[]).concat(nw.wlan||[],nw.firewall||[]).join(', ')+'</td></tr>';
+  html+='<tr><td style="padding:5px 8px;border:1px solid #ddd">Telefonie / UC</td><td style="padding:5px 8px;border:1px solid #ddd">'+(tf.system||[]).join(', ')+(tf.typ?' ('+tf.typ+')':'')+(tf.alter&&tf.alter!=='unbekannt'?' Alter: '+tf.alter:'')+'</td></tr>';
+  html+='<tr><td style="padding:5px 8px;border:1px solid #ddd">Server / Backup</td><td style="padding:5px 8px;border:1px solid #ddd">'+(sv.server||[]).concat(sv.backup||[]).join(', ')+(sv.hosting?' ('+sv.hosting+')':'')+'</td></tr>';
+  html+='<tr><td style="padding:5px 8px;border:1px solid #ddd">Workplace-SW</td><td style="padding:5px 8px;border:1px solid #ddd">'+(sw.os||[]).join(', ')+(sw.office365&&sw.office365!=='unbekannt'?' | M365: '+sw.office365:'')+(sw.mdm&&sw.mdm.length?' | MDM: '+sw.mdm.join(', '):'')+'</td></tr>';
+  html+='<tr><td style="padding:5px 8px;border:1px solid #ddd"><strong>Geraete-Hochrechnung</strong></td><td style="padding:5px 8px;border:1px solid #ddd"><strong>'+(bi.geraete_hochrechnung||'')+'</strong></td></tr>';
+  html+='</table>';
+  html+='<h2>Angebotsansaetze fuer uns als Systemhaus</h2><table><tr><th>Kategorie</th><th>Angebotsansatz</th><th>Volumen</th><th>Trigger</th></tr>'+offers+'</table>';
+  html+='<h2>Finanzdaten</h2><table><tr><td style="padding:5px 8px;border:1px solid #ddd;width:35%"><strong>Jahresumsatz</strong></td><td style="padding:5px 8px;border:1px solid #ddd">'+(fi.revenue||'')+'</td></tr><tr><td style="padding:5px 8px;border:1px solid #ddd"><strong>Mitarbeiter</strong></td><td style="padding:5px 8px;border:1px solid #ddd">'+(fi.employees||'')+'</td></tr><tr><td style="padding:5px 8px;border:1px solid #ddd"><strong>IT-Budget p.a.</strong></td><td style="padding:5px 8px;border:1px solid #ddd">'+(fi.it_budget_estimate||'')+'</td></tr></table>';
+  html+='<h2>Sales-Strategie</h2><div class="box"><strong>Hauptaufhaenger:</strong><br>'+(d.sales_angles&&d.sales_angles.main_pitch||'')+'</div><ol>'+(d.sales_angles&&d.sales_angles.action_items||[]).map(function(a){return'<li>'+a+'</li>';}).join('')+'</ol>';
+  html+='<p style="color:#aaa;font-size:8pt;margin-top:16pt;border-top:1pt solid #eee;padding-top:6pt">IT Sales Intelligence Agent &mdash; '+new Date().toLocaleDateString('de-DE')+'</p></body></html>';
+  var blob=new Blob([html],{type:'application/msword'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');a.href=url;a.download='IT-Analyse_'+(d.company||'Firma').replace(/[^a-zA-Z0-9]/g,'_')+'_'+new Date().toISOString().slice(0,10)+'.doc';
+  document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);
+}
+
+function openhs(){renderHF();document.getElementById('hsmov').classList.add('on');document.getElementById('hsmsg').classList.remove('on');document.getElementById('hsres').style.display='none';HSID=null;}
+function closehs(){document.getElementById('hsmov').classList.remove('on');}
+function stab(t){document.querySelectorAll('.tabt').forEach(function(b){b.classList.remove('on');});document.querySelectorAll('.tabp').forEach(function(p){p.classList.remove('on');});document.querySelector('.tabt[onclick="stab(\''+t+'\')"]').classList.add('on');document.getElementById('tab-'+t).classList.add('on');}
+function renderHF(){var l=document.getElementById('hflist');l.innerHTML=HF.map(function(f){return'<div class="hfr"><span class="hfn">'+f.n+'</span><span class="hfd">'+f.d+'</span><span class="hft">Typ: '+f.t+' | Label: "'+f.l+'"</span></div>';}).join('');}
+function sethsmsg(m,t){var el=document.getElementById('hsmsg');el.textContent=m;el.className='hss '+t+' on';}
+
+async function searchhs(){
+  var tok=document.getElementById('tok').value.trim(),q=document.getElementById('hssearch').value.trim();
+  if(!tok){sethsmsg('Bitte Token eingeben.','er');return;}if(!q)return;
+  sethsmsg('Suche in HubSpot...','ld');
+  try{
+    var r=await fetch('https://api.hubapi.com/crm/v3/objects/companies/search',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+tok},body:JSON.stringify({query:q,limit:5,properties:['name','domain','city']})});
+    if(!r.ok){var ex=await r.json();throw new Error(ex.message||'HTTP '+r.status);}
+    var data=await r.json();var res=data.results||[];
+    var con=document.getElementById('hsres');con.style.display='block';
+    if(!res.length){con.innerHTML='<p style="font-size:12px;color:var(--text-dim);padding:6px 0">Nicht gefunden &mdash; wird neu angelegt.</p>';HSID=null;}
+    else{con.innerHTML='<p style="font-family:var(--mono);font-size:10px;color:var(--text-dim);margin-bottom:7px;">TREFFER:</p>'+res.map(function(x){return'<div onclick="pickhs(\''+x.id+'\',\''+((x.properties.name||'').replace(/'/g,''))+'\')" style="padding:8px 11px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;cursor:pointer;margin-bottom:5px;font-size:13px" onmouseover="this.style.borderColor=\'var(--hs)\'" onmouseout="this.style.borderColor=\'var(--border)\'"><strong style="color:var(--text-bright)">'+(x.properties.name||'')+'</strong><span style="font-family:var(--mono);font-size:10px;color:var(--text-dim);margin-left:8px">ID: '+x.id+'</span>'+(x.properties.city?'<span style="font-family:var(--mono);font-size:10px;color:var(--text-dim);margin-left:8px">'+x.properties.city+'</span>':'')+'</div>';}).join('');}
+    document.getElementById('hsmsg').classList.remove('on');
+  }catch(err){sethsmsg('Fehler: '+err.message,'er');}
+}
+
+function pickhs(id,name){HSID=id;sethsmsg('Ausgewaehlt: '+name+' (ID: '+id+')','ok');}
+
+async function saveks(){
+  if(!RES){sethsmsg('Keine Daten.','er');return;}
+  var tok=document.getElementById('tok').value.trim();
+  if(!tok){sethsmsg('Bitte Token eingeben.','er');return;}
+  var d=RES;var bi=d.buero_it||{};var eg=bi.endgeraete||{};var pr=bi.drucken||{};var nw=bi.netzwerk||{};var tf=bi.telefonie||{};var sv=bi.server_storage||{};var sw=bi.workplace_software||{};
+  document.getElementById('savebtn').disabled=true;sethsmsg('Speichere...','ld');
+  var wpTxt=[
+    'ENDGERAETE: '+(eg.notebooks||[]).concat(eg.desktops||[]).join(', '),
+    'MONITORE: '+(eg.monitore||[]).join(', '),
+    'TABLETS/PHONES: '+(eg.tablets||[]).concat(eg.smartphones||[]).join(', '),
+    'DRUCKER/MFP: '+(pr.mfp||[]).join(', ')+(pr.vertrag_ablauf&&pr.vertrag_ablauf!=='unbekannt'?' | Vertragsende: '+pr.vertrag_ablauf:''),
+    'NETZWERK: '+(nw.switches||[]).concat(nw.wlan||[],nw.firewall||[]).join(', '),
+    'TELEFONIE: '+(tf.system||[]).join(', ')+(tf.typ?' ('+tf.typ+')':'')+(tf.alter&&tf.alter!=='unbekannt'?' Alter: '+tf.alter:''),
+    'SERVER/BACKUP: '+(sv.server||[]).concat(sv.backup||[]).join(', ')+(sv.hosting?' ('+sv.hosting+')':''),
+    'MDM/SECURITY: '+(sw.mdm||[]).concat(sw.endpoint_security||[]).join(', '),
+    'HOCHRECHNUNG: '+(bi.geraete_hochrechnung||''),
+    bi.detail?'DETAILS: '+bi.detail:''
+  ].filter(function(x){return x&&x.length>10;}).join('\n');
+  var props={
+    name:d.company||'',city:d.location||'',
+    it_sales_potenzial:d.sales_potential||'',
+    it_analyse_datum:new Date().toISOString().slice(0,10),
+    it_entscheider:(d.decision_makers||[]).map(function(p){return p.name+' ('+p.role+'): '+(p.notes||'');}).join('\n\n'),
+    it_workplace_it:wpTxt,
+    it_partner_aktuell:(d.it_partners||[]).map(function(p){return p.name+' ('+p.type+')'+(p.contract_end&&p.contract_end!=='null'?' Ende: '+p.contract_end:'')+': '+p.evidence;}).join('\n'),
+    it_angebotsansaetze:(d.systemhaus_angebote||[]).map(function(o){return'['+o.prioritaet.toUpperCase()+'] '+o.kategorie+': '+o.beschreibung+(o.volumen_schaetzung?' ('+o.volumen_schaetzung+')':'')+(o.trigger?' | '+o.trigger:'');}).join('\n\n'),
+    it_investitionssignale:(d.investment_signals||[]).map(function(s){return'['+s.priority.toUpperCase()+'] '+s.title+': '+s.description;}).join('\n\n'),
+    it_pain_points:(d.pain_points||[]).map(function(p){return'['+p.priority.toUpperCase()+'] '+p.title+': '+p.description;}).join('\n\n'),
+    it_sales_pitch:[(d.sales_angles&&d.sales_angles.main_pitch)||''].concat((d.sales_angles&&d.sales_angles.action_items||[]).map(function(a,i){return(i+1)+'. '+a;})).join('\n\n'),
+    it_budget_schaetzung:(d.financial_info&&d.financial_info.it_budget_estimate)||'',
+    it_jahresumsatz:(d.financial_info&&d.financial_info.revenue)||'',
+    it_offene_punkte:(d.data_gaps||[]).join('\n'),
+    it_quellen:(d.sources||[]).map(function(s){return s.title+': '+(s.url||'');}).join('\n'),
+  };
+  try{
+    var resp,result;
+    if(HSID){
+      resp=await fetch('https://api.hubapi.com/crm/v3/objects/companies/'+HSID,{method:'PATCH',headers:{'Content-Type':'application/json','Authorization':'Bearer '+tok},body:JSON.stringify({properties:props})});
+      if(!resp.ok){var ex=await resp.json();throw new Error(ex.message||'HTTP '+resp.status);}
+      result=await resp.json();sethsmsg('Aktualisiert: '+d.company+' (ID: '+result.id+')','ok');
+    }else{
+      resp=await fetch('https://api.hubapi.com/crm/v3/objects/companies',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+tok},body:JSON.stringify({properties:props})});
+      if(!resp.ok){var ex2=await resp.json();throw new Error(ex2.message||'HTTP '+resp.status);}
+      result=await resp.json();sethsmsg('Angelegt: '+d.company+' (ID: '+result.id+')','ok');
+    }
+  }catch(err){
+    var msg=err.message;
+    if(msg.indexOf('PROPERTY_DOESNT_EXIST')>-1||msg.indexOf('unknown property')>-1)msg='Custom Properties fehlen. Bitte unter "Felder einrichten" alle anlegen.';
+    sethsmsg('Fehler: '+msg,'er');
+  }finally{document.getElementById('savebtn').disabled=false;}
+}
+
+document.addEventListener('DOMContentLoaded',function(){
+  loadKey();
+  ['co','loc','ind'].forEach(function(id){document.getElementById(id).addEventListener('keydown',function(e){if(e.key==='Enter')go();});});
+  renderHF();
+});
+</script>
+</body>
+</html>

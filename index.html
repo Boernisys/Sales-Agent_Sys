@@ -361,13 +361,6 @@ async function go(){
   var co=document.getElementById('co').value.trim();
   if(!co){document.getElementById('co').focus();return;}
   var apiKey=getKey();
-  if(!apiKey){
-    var eb=document.getElementById('errbox');
-    eb.textContent='Bitte zuerst den Anthropic API-Key oben eingeben und speichern.';
-    eb.classList.add('on');
-    document.getElementById('apikey').focus();
-    return;
-  }
   var loc=document.getElementById('loc').value.trim(),ind=document.getElementById('ind').value.trim();
   document.getElementById('errbox').classList.remove('on');
   document.getElementById('res').classList.remove('on');

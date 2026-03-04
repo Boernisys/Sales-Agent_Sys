@@ -320,7 +320,7 @@ function showKeyStatus(k){
   }
 }
 function getKey(){
-  return document.getElementById('apikey').value.trim()||localStorage.getItem('ant_key')||'';
+  return 'configured';
 }
 
 function tc(el){var k=el.dataset.k;if(AF.has(k)){AF.delete(k);el.classList.remove('on');}else{AF.add(k);el.classList.add('on');}}
